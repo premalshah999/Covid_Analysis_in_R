@@ -7,9 +7,8 @@
 > **When should governments act to prevent healthcare system collapse?**  
 > A data-driven analysis of COVID-19 policy timing using machine learning.
 
-![Policy Analysis](Policy_Timing_Optimization_files/figure-html/timing_visualization-1.png)
 
-## 📋 Overview
+##  Overview
 
 This project analyzes **85,000+ observation-days** across **198 regions worldwide** to determine the optimal timing for government policy interventions during the COVID-19 pandemic. Using the [COVID-19 Data Hub](https://covid19datahub.io/), I built predictive models that can forecast ICU surges **14 days in advance** with exceptional accuracy.
 
@@ -17,12 +16,12 @@ This project analyzes **85,000+ observation-days** across **198 regions worldwid
 
 | Finding | Detail |
 |---------|--------|
-| 🎯 **Prediction Accuracy** | Random Forest achieves **AUC 0.94** for surge prediction |
-| ⏰ **Warning Window** | Governments have **16 days** to act when ICU hits 10-15 per 100k |
-| 📊 **Best Predictor** | Current ICU utilization is the strongest predictor of future crises |
-| 🛡️ **Policy Effect** | High-stringency policies associated with **~3% lower** surge rates |
+|  **Prediction Accuracy** | Random Forest achieves **AUC 0.94** for surge prediction |
+|  **Warning Window** | Governments have **16 days** to act when ICU hits 10-15 per 100k |
+|  **Best Predictor** | Current ICU utilization is the strongest predictor of future crises |
+|  **Policy Effect** | High-stringency policies associated with **~3% lower** surge rates |
 
-## 🚀 Quick Start
+##  Quick Start
 
 ### Prerequisites
 
@@ -55,7 +54,7 @@ This project analyzes **85,000+ observation-days** across **198 regions worldwid
    rmarkdown::render("Policy_Timing_Optimization.Rmd")
    ```
 
-## 📊 Project Structure
+##  Project Structure
 
 ```
 ├── Policy_Timing_Optimization.Rmd    # Main analysis (R Markdown)
@@ -69,7 +68,7 @@ This project analyzes **85,000+ observation-days** across **198 regions worldwid
 └── README.md                         # This file
 ```
 
-## 🔬 Methodology
+##  Methodology
 
 ### Data Source
 - **COVID-19 Data Hub**: Comprehensive database from University of Milan aggregating official pandemic statistics
@@ -95,7 +94,7 @@ This project analyzes **85,000+ observation-days** across **198 regions worldwid
 - Bootstrap confidence intervals
 - Sensitivity analysis across thresholds
 
-## 📈 Visualizations
+##  Visualizations
 
 The analysis includes 10+ professional visualizations:
 
@@ -105,7 +104,7 @@ The analysis includes 10+ professional visualizations:
 - **Feature Importance**: What drives predictions
 - **Bootstrap Results**: Uncertainty quantification
 
-## 🎯 Key Results
+##  Key Results
 
 ### ICU Surge Prediction
 ```
@@ -124,19 +123,19 @@ Random Forest Performance:
 ### Decision Framework
 | ICU Level (per 100k) | Risk Level | Recommended Action |
 |---------------------|------------|-------------------|
-| < 5 | 🟢 Safe | Monitor weekly |
-| 5-10 | 🟡 Elevated | Increase vigilance |
-| 10-15 | 🟠 High Risk | Prepare interventions |
-| ≥ 15 | 🔴 Crisis | Immediate action required |
+| < 5 |  Safe | Monitor weekly |
+| 5-10 |  Elevated | Increase vigilance |
+| 10-15 |  High Risk | Prepare interventions |
+| ≥ 15 |  Crisis | Immediate action required |
 
-## ⚠️ Limitations
+##  Limitations
 
 - **Geographic Bias**: Predominantly Western European and North American data
 - **Observational Study**: Associations, not causal claims
 - **Confounding Factors**: Economic conditions, cultural compliance, healthcare capacity
 - **Temporal Dynamics**: Virus variants evolved over study period
 
-## �️ Troubleshooting
+##  Troubleshooting
 
 Common issues and solutions are documented in [TROUBLESHOOTING_GUIDE.md](TROUBLESHOOTING_GUIDE.md).
 
@@ -145,21 +144,21 @@ Common issues and solutions are documented in [TROUBLESHOOTING_GUIDE.md](TROUBLE
 - **Memory issues**: Reduce `ntree = 500` to `ntree = 250`
 - **Slow knitting**: Enable caching in chunk options
 
-## 📚 References
+##  References
 
 1. Guidotti, E., & Ardia, D. (2020). COVID-19 Data Hub. *Journal of Open Source Software*, 5(51), 2376.
 2. Hale, T., et al. (2021). A global panel database of pandemic policies (Oxford COVID-19 Government Response Tracker). *Nature Human Behaviour*, 5, 529-538.
 
-## 📄 License
+##  License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-## 👤 Author
+##  Author
 
 **Premal Shah**
 - GitHub: [@premalshah999](https://github.com/premalshah999)
 
-## 🙏 Acknowledgments
+##  Acknowledgments
 
 - [COVID-19 Data Hub](https://covid19datahub.io/) for comprehensive pandemic data
 - [Oxford Government Response Tracker](https://www.bsg.ox.ac.uk/research/covid-19-government-response-tracker) for policy stringency metrics
