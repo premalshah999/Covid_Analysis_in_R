@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Policy Timing Optimization</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Serif:wght@600&display=swap" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --black: #1a1a1a;
+            --gray-dark: #404040;
+            --gray: #737373;
+            --gray-light: #d4d4d4;
+            --white: #fafafa;
+            --blue: #2563eb;
+        }
+
+        body {
+            font-family: 'IBM Plex Sans', -apple-system, system-ui, sans-serif;
+            background: var(--white);
+            color: var(--black);
+            overflow: hidden;
+            height: 100vh;
+        }
+
+        .viewport {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        /* Slides */
+        .slide {
+            position: absolute;
+            inset: 0;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.4s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 100px 120px;
+        }
+
+        .slide.active {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        .content {
+            max-width: 1200px;
+            width: 100%;
+        }
+
+        /* Typography */
+        h1 {
+            font-family: 'IBM Plex Serif', serif;
+            font-size: 4rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            line-height: 1.1;
+            color: var(--black);
+            margin-bottom: 1.5rem;
+        }
+
+        h2 {
+            font-family: 'IBM Plex Serif', serif;
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.01em;
+            margin-bottom: 2.5rem;
+            color: var(--black);
+        }
+
+        h3 {
+            font-size: 0.875rem;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            margin-bottom: 1rem;
+            color: var(--gray-dark);
+        }
+
+        p {
+            font-size: 1.125rem;
+            line-height: 1.7;
+            color: var(--gray-dark);
+        }
+
+        /* Grid */
+        .grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 100px;
+        }
+
+        /* Data */
+        .metric {
+            margin-bottom: 3rem;
+        }
+
+        .metric-value {
+            font-family: 'IBM Plex Serif', serif;
+            font-size: 3.5rem;
+            font-weight: 600;
+            color: var(--black);
+            line-height: 1;
+            margin-bottom: 0.5rem;
+        }
+
+        .metric-label {
+            font-size: 0.875rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        /* Lists */
+        ul {
+            list-style: none;
+            margin: 0;
+            padding: 0;
+        }
+
+        li {
+            font-size: 1rem;
+            line-height: 1.8;
+            color: var(--gray-dark);
+            margin-bottom: 0.75rem;
+            padding-left: 1.5rem;
+            position: relative;
+        }
+
+        li::before {
+            content: "—";
+            position: absolute;
+            left: 0;
+            color: var(--gray);
+        }
+
+        /* Bar Chart */
+        .chart-bar {
+            margin-bottom: 2rem;
+        }
+
+        .chart-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--gray-dark);
+        }
+
+        .chart-track {
+            height: 4px;
+            background: var(--gray-light);
+            position: relative;
+        }
+
+        .chart-fill {
+            position: absolute;
+            left: 0;
+            top: 0;
+            height: 100%;
+            background: var(--black);
+            width: 0;
+            transition: width 1s ease;
+        }
+
+        /* Column Chart */
+        .chart-columns {
+            display: flex;
+            align-items: flex-end;
+            height: 280px;
+            gap: 60px;
+            border-bottom: 1px solid var(--gray-light);
+            padding-bottom: 1rem;
+        }
+
+        .column {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .column-bar {
+            width: 100%;
+            background: var(--gray-dark);
+            height: 0;
+            transition: height 1s ease;
+            position: relative;
+        }
+
+        .column-value {
+            position: absolute;
+            top: -2rem;
+            left: 0;
+            right: 0;
+            text-align: center;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--black);
+            opacity: 0;
+            transition: opacity 0.3s 0.8s;
+        }
+
+        .slide.active .column-value {
+            opacity: 1;
+        }
+
+        .column-label {
+            margin-top: 1rem;
+            text-align: center;
+            font-size: 0.75rem;
+            color: var(--gray);
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            line-height: 1.4;
+        }
+
+        /* Cards */
+        .card {
+            border: 1px solid var(--gray-light);
+            padding: 2rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .card-title {
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--black);
+        }
+
+        .card-text {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: var(--gray-dark);
+        }
+
+        /* Findings */
+        .findings {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+        }
+
+        .finding {
+            border-left: 2px solid var(--gray-light);
+            padding-left: 1.5rem;
+        }
+
+        .finding-number {
+            font-size: 0.75rem;
+            font-weight: 600;
+            color: var(--gray);
+            margin-bottom: 0.75rem;
+            letter-spacing: 0.05em;
+        }
+
+        .finding-title {
+            font-size: 1rem;
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--black);
+        }
+
+        .finding-text {
+            font-size: 0.875rem;
+            line-height: 1.6;
+            color: var(--gray-dark);
+        }
+
+        /* Callout */
+        .callout {
+            border-left: 3px solid var(--black);
+            padding: 1.5rem;
+            margin-top: 2.5rem;
+            background: #f5f5f5;
+        }
+
+        .callout p {
+            font-size: 1rem;
+            color: var(--black);
+            margin: 0;
+        }
+
+        /* Emphasis */
+        .em {
+            color: var(--black);
+            font-weight: 600;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            bottom: 40px;
+            right: 40px;
+            display: flex;
+            gap: 1rem;
+            z-index: 100;
+        }
+
+        .nav-btn {
+            width: 44px;
+            height: 44px;
+            border: 1px solid var(--gray-light);
+            background: var(--white);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 1rem;
+            color: var(--gray-dark);
+            transition: all 0.2s;
+        }
+
+        .nav-btn:hover {
+            border-color: var(--black);
+            color: var(--black);
+        }
+
+        /* Progress */
+        .progress {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 1px;
+            background: var(--gray-light);
+            z-index: 100;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--black);
+            width: 0;
+            transition: width 0.3s;
+        }
+
+        /* Counter */
+        .counter {
+            position: fixed;
+            bottom: 40px;
+            left: 40px;
+            font-size: 0.875rem;
+            color: var(--gray);
+            z-index: 100;
+        }
+
+        /* Timer */
+        .timer {
+            position: fixed;
+            top: 40px;
+            right: 40px;
+            font-size: 1.25rem;
+            font-weight: 500;
+            color: var(--black);
+            font-variant-numeric: tabular-nums;
+            z-index: 100;
+        }
+
+        .timer.warning {
+            color: #dc2626;
+        }
+
+        /* Divider */
+        .divider {
+            height: 1px;
+            background: var(--gray-light);
+            margin: 3rem 0;
+        }
+
+        /* Label */
+        .label {
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--gray);
+            margin-bottom: 2rem;
+            display: block;
+        }
+
+    </style>
+</head>
+<body>
+
+<div class="viewport">
+    <div class="progress">
+        <div class="progress-fill" id="progress"></div>
+    </div>
+    <div class="counter"><span id="current">1</span> / 5</div>
+    <div class="timer" id="timer">1:30</div>
+    <div class="nav">
+        <button class="nav-btn" onclick="prevSlide()">←</button>
+        <button class="nav-btn" onclick="nextSlide()">→</button>
+    </div>
+
+    <!-- Slide 1 -->
+    <div class="slide active">
+        <div class="content">
+            <span class="label">Research Presentation</span>
+            <h1>Policy Timing Optimization</h1>
+            <p style="font-size: 1.375rem; margin-bottom: 4rem; max-width: 700px;">
+                When Should Governments Act to Prevent Healthcare System Collapse?
+            </p>
+            <div class="metric">
+                <div class="metric-value">97</div>
+                <div class="metric-label">Regions Analyzed</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 2 -->
+    <div class="slide">
+        <div class="content">
+            <div class="grid">
+                <div>
+                    <h2>The Challenge</h2>
+                    <p style="margin-bottom: 2.5rem;">
+                        Can we predict <span class="em">ICU surges 14 days in advance</span> to give policymakers time to act?
+                    </p>
+
+                    <h3>Approach</h3>
+                    <ul>
+                        <li>COVID-19 Data Hub (97 regions)</li>
+                        <li>Target: ICU surge >25% in 14 days</li>
+                        <li>Random Forest vs Logistic Regression</li>
+                    </ul>
+
+                    <div class="callout">
+                        <p>What predicts surges better—current ICU load or policy stringency?</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h3>Data Pipeline</h3>
+
+                    <div class="card">
+                        <div class="card-title">01 — Data Source</div>
+                        <p class="card-text">COVID-19 Data Hub: ICU metrics, case counts, policy stringency indices</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">02 — Cleaning</div>
+                        <p class="card-text">Forward-fill imputation, 7-day rolling averages, outlier removal</p>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">03 — Feature Engineering</div>
+                        <p class="card-text">ICU per 100k, growth rates, stringency lags (7, 14, 21 days)</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 3 -->
+    <div class="slide">
+        <div class="content">
+            <div class="grid">
+                <div>
+                    <h2>Model Performance</h2>
+
+                    <h3>Predictive Accuracy (AUC)</h3>
+                    <p style="font-size: 0.875rem; color: var(--gray); margin-bottom: 2rem;">
+                        0.5 = random, 1.0 = perfect
+                    </p>
+
+                    <div class="chart-bar">
+                        <div class="chart-label">
+                            <span>Logistic Regression</span>
+                            <span>0.773</span>
+                        </div>
+                        <div class="chart-track">
+                            <div class="chart-fill" data-width="77.3%"></div>
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-label">
+                            <span>Random Forest</span>
+                            <span style="font-weight: 600;">0.964</span>
+                        </div>
+                        <div class="chart-track">
+                            <div class="chart-fill" data-width="96.4%"></div>
+                        </div>
+                    </div>
+
+                    <div class="callout">
+                        <p>Random Forest achieves <span class="em">96.4% accuracy</span> by capturing non-linear relationships.</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h2 style="font-size: 1.5rem;">What Predicts Surges?</h2>
+
+                    <h3>Feature Importance</h3>
+
+                    <div class="chart-bar">
+                        <div class="chart-label">
+                            <span>ICU per 100k</span>
+                            <span>9,312</span>
+                        </div>
+                        <div class="chart-track">
+                            <div class="chart-fill" data-width="100%"></div>
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-label">
+                            <span>Cases per 100k</span>
+                            <span>8,942</span>
+                        </div>
+                        <div class="chart-track">
+                            <div class="chart-fill" data-width="96%"></div>
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-label">
+                            <span>ICU Growth Rate</span>
+                            <span>8,419</span>
+                        </div>
+                        <div class="chart-track">
+                            <div class="chart-fill" data-width="90%"></div>
+                        </div>
+                    </div>
+
+                    <div class="chart-bar">
+                        <div class="chart-label">
+                            <span>Policy Stringency</span>
+                            <span>4,700</span>
+                        </div>
+                        <div class="chart-track">
+                            <div class="chart-fill" data-width="50%"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 4 -->
+    <div class="slide">
+        <div class="content">
+            <div class="grid">
+                <div>
+                    <h2>Ceiling Effect</h2>
+
+                    <p style="font-size: 0.875rem; color: var(--gray); margin-bottom: 2rem;">
+                        ICU Surge Probability by Current Utilization
+                    </p>
+
+                    <div class="chart-columns">
+                        <div class="column">
+                            <div class="column-bar" data-height="230px">
+                                <span class="column-value">26.5%</span>
+                            </div>
+                            <div class="column-label">Low ICU<br><5 per 100k</div>
+                        </div>
+
+                        <div class="column">
+                            <div class="column-bar" data-height="120px">
+                                <span class="column-value">12.3%</span>
+                            </div>
+                            <div class="column-label">Medium<br>5-10 per 100k</div>
+                        </div>
+
+                        <div class="column">
+                            <div class="column-bar" data-height="50px">
+                                <span class="column-value">4.9%</span>
+                            </div>
+                            <div class="column-label">High ICU<br>≥10 per 100k</div>
+                        </div>
+                    </div>
+
+                    <div class="callout">
+                        <p>High ICU regions show lower surge risk—not policy success, but a ceiling effect (no room to grow).</p>
+                    </div>
+                </div>
+
+                <div>
+                    <h2>Key Findings</h2>
+
+                    <div class="findings">
+                        <div class="finding">
+                            <div class="finding-number">01</div>
+                            <div class="finding-title">Exceptional Predictability</div>
+                            <p class="finding-text">AUC = 0.964 enables 14-day advance warning for ICU surges</p>
+                        </div>
+
+                        <div class="finding">
+                            <div class="finding-number">02</div>
+                            <div class="finding-title">Current Load Matters</div>
+                            <p class="finding-text">ICU per 100k is strongest predictor, not policy stringency</p>
+                        </div>
+
+                        <div class="finding">
+                            <div class="finding-number">03</div>
+                            <div class="finding-title">Ceiling Effect</div>
+                            <p class="finding-text">High ICU: 4.9% risk vs Low ICU: 26.5% risk</p>
+                        </div>
+
+                        <div class="finding">
+                            <div class="finding-number">04</div>
+                            <div class="finding-title">Modest Policy Effect</div>
+                            <p class="finding-text">High stringency: 22.2% vs Lower: 24.9-25.6%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Slide 5 -->
+    <div class="slide">
+        <div class="content" style="max-width: 1000px;">
+            <h2 style="margin-bottom: 3rem;">Impact & Takeaways</h2>
+
+            <div class="grid">
+                <div>
+                    <h3>What We Achieved</h3>
+                    <ul>
+                        <li>96.4% accuracy predicting surges 14 days ahead</li>
+                        <li>Identified current ICU load as #1 predictor</li>
+                        <li>Discovered counterintuitive ceiling effect</li>
+                        <li>Quantified modest policy-surge associations</li>
+                    </ul>
+                </div>
+
+                <div>
+                    <h3>Policy Implications</h3>
+                    <ul>
+                        <li>Monitor ICU utilization directly over case counts</li>
+                        <li>Use ML for proactive 14-day warnings</li>
+                        <li>Interpret high-ICU "safety" with caution</li>
+                        <li>Consider observational data limitations</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="divider"></div>
+
+            <div style="text-align: center;">
+                <h3 style="font-size: 1.25rem; font-weight: 600; text-transform: none; letter-spacing: -0.01em; margin-bottom: 1rem; color: var(--black);">
+                    Data-Driven Pandemic Response
+                </h3>
+                <p style="max-width: 650px; margin: 0 auto; color: var(--gray-dark);">
+                    Predictive models enable <span class="em">proactive intervention</span> without relying solely on reactive policy stringency measures.
+                </p>
+            </div>
+        </div>
+    </div>
+
+</div>
+
+<script>
+    let current = 0;
+    const slides = document.querySelectorAll('.slide');
+    const total = slides.length;
+    const progress = document.getElementById('progress');
+    const counter = document.getElementById('current');
+    const timer = document.getElementById('timer');
+
+    let time = 90;
+    let interval;
+
+    function startTimer() {
+        interval = setInterval(() => {
+            time--;
+            const min = Math.floor(time / 60);
+            const sec = time % 60;
+            timer.textContent = `${min}:${sec.toString().padStart(2, '0')}`;
+
+            if (time <= 20) timer.classList.add('warning');
+            if (time <= 0) {
+                clearInterval(interval);
+                timer.textContent = 'TIME';
+            }
+        }, 1000);
+    }
+
+    function update() {
+        slides.forEach((s, i) => s.classList.toggle('active', i === current));
+        counter.textContent = current + 1;
+        progress.style.width = `${((current + 1) / total) * 100}%`;
+
+        setTimeout(() => {
+            slides[current].querySelectorAll('.chart-fill').forEach(bar => {
+                const w = bar.getAttribute('data-width');
+                if (w) bar.style.width = w;
+            });
+            slides[current].querySelectorAll('.column-bar').forEach(col => {
+                const h = col.getAttribute('data-height');
+                if (h) col.style.height = h;
+            });
+        }, 200);
+    }
+
+    function nextSlide() {
+        if (current === 0 && !interval) startTimer();
+        if (current < total - 1) {
+            current++;
+            update();
+        }
+    }
+
+    function prevSlide() {
+        if (current > 0) {
+            current--;
+            update();
+        }
+    }
+
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'ArrowRight' || e.key === ' ') {
+            e.preventDefault();
+            nextSlide();
+        }
+        if (e.key === 'ArrowLeft') {
+            e.preventDefault();
+            prevSlide();
+        }
+    });
+
+    update();
+</script>
+
+</body>
+</html>

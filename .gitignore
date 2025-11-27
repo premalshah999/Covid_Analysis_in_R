@@ -1,0 +1,47 @@
+# R specific
+.Rhistory
+.Rapp.history
+.RData
+.Ruserdata
+.Rproj.user/
+
+# R package files
+*.Rcheck/
+*.tar.gz
+
+# Session files
+*.Rproj.user/
+.Rprofile
+
+# Temporary files
+*~
+\#*\#
+.\#*
+
+# Cache directories (large files, regenerated on knit)
+*_cache/
+Policy_Timing_Optimization_cache/
+
+# Backup files
+*.rds
+*.RData
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE
+.idea/
+*.swp
+*.swo
+.vscode/
+
+# Large generated files (can be regenerated)
+# Uncomment if you want to exclude generated outputs:
+# Policy_Timing_Optimization.html
+# Policy_Timing_Optimization.pdf
